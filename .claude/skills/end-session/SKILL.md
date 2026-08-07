@@ -1,7 +1,7 @@
 ---
 name: end-session
 description: Full session close-out — reconcile STATUS, append decisions, record deferrals, and stamp the doc index so the next start-session is accurate. For quick mid-session saves use save-context instead. Run at a genuine close-out, when the user signals wrap-up, or when low on context.
-allowed-tools: Read Glob Grep Edit Write Bash(git status:*) Bash(git log:*) Bash(git diff:*)
+allowed-tools: Read Glob Grep Edit Write Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(svn status:*) Bash(svn log:*) Bash(svn diff:*)
 ---
 
 You are closing out a working session on this project.
@@ -18,7 +18,8 @@ loop that keeps the docs canonical.
 ## 1. Reconstruct what happened
 
 - Run `git status`, `git log --oneline` (since the session start if you can tell, else last few),
-  and `git diff --stat` to see what changed on disk.
+  and `git diff --stat` to see what changed on disk. (svn projects: `svn status`, `svn log -l 10`,
+  `svn diff --summarize`.)
 - Review this conversation for: decisions made, work completed, things tried and abandoned, new
   problems discovered, and anything deferred.
 - Write yourself a short internal summary before touching any file.
@@ -54,7 +55,8 @@ stale — this is the only point in the loop where doc rot gets caught.
 - Appending a decision to the decision log that was clearly and explicitly decided this session
   but not yet logged (log-as-you-go should have caught most; this backstops the gaps).
 - Moving finished items out of Active.
-- Marking completed work orders `done` in `work-orders/` (coordinator/executor projects).
+- Marking completed work orders `done` in `work-orders/<branch-slug>/` (coordinator/subagents
+  projects).
 
 **Confirm before applying** (judgment calls) — propose, then wait for the user's yes:
 - Marking any doc 🔴 Obsolete or ⚠️ Suspect.

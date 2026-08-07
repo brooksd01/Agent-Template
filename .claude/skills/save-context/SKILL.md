@@ -1,7 +1,7 @@
 ---
 name: save-context
 description: Lightweight mid-session checkpoint — sync STATUS (where we are / active now) to current reality, nothing more. Safe to run repeatedly. Use as a backup-save when stepping away or before context compaction; does NOT touch the decision log, roadmap, or deferred-items.
-allowed-tools: Read Glob Grep Edit Write Bash(git status:*) Bash(git log:*) Bash(git diff:*)
+allowed-tools: Read Glob Grep Edit Write Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(svn status:*) Bash(svn log:*) Bash(svn diff:*)
 ---
 
 You are saving a quick checkpoint of the current working session on this
@@ -22,7 +22,8 @@ times in a session.
 
 ## Steps
 
-1. **Quick reconstruct.** Run `git status` and `git log --oneline -5`. Scan the conversation since
+1. **Quick reconstruct.** Run `git status` and `git log --oneline -5` (svn projects: `svn status`
+   and `svn log -l 5`). Scan the conversation since
    the last checkpoint for: work completed, new actions/bugs surfaced, things now blocked or
    unblocked. Keep it brief — this is a save-point, not a full audit.
 2. **Sync `docs/2-project-status.md`:**

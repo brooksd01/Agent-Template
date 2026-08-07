@@ -62,11 +62,20 @@ and follow the corresponding `SKILL.md`**:
 
 ### Asking the developer questions
 
-- **Default to text, not pop-ups.** When you need a decision or clarification, ask in the body of
-  your reply — as numbered questions when there is more than one, so each can be answered in turn.
-  Do **not** reach for structured/pop-up question prompts (e.g. Claude Code's AskUserQuestion)
-  unless the developer explicitly asks for that format; they hide the surrounding text the reader
-  needs before answering.
+**Project preference:** _[set by init-project — `text` or `pop-up`]_
+
+Two styles, chosen per project by the developer during init-project:
+
+- **`text` (the default)** — when you need a decision or clarification, ask in the body of your
+  reply, as numbered questions when there is more than one, so each can be answered in turn. Don't
+  reach for structured/pop-up prompts (e.g. Claude Code's AskUserQuestion); they hide the
+  surrounding text the reader needs before answering.
+- **`pop-up`** — use structured question prompts for discrete decisions (yes/no calls, picking
+  between named options), keeping the essential context inside the prompt itself; fall back to
+  text for anything that needs surrounding discussion to answer well.
+
+Whichever is set, it's a default, not a lock — the developer can ask for the other format at any
+moment, and one-off requests override the preference for that exchange.
 
 ## The document hierarchy
 
@@ -76,30 +85,35 @@ and follow the corresponding `SKILL.md`**:
 | `docs/3-project-roadmap.md` | **Strategic** | Phase-by-phase plan and status. Changes when a phase moves. |
 | `docs/5-deferred-items.md` | **Someday/maybe** | Consciously-punted items, each with a revisit *trigger*. |
 | `docs/4-decision-log.md` | **Permanent** | Append-only, dated decisions *and their rationale*. Never rewrite; append. |
-| `docs/6-working-model.md` | **Operating** | How sessions are structured (solo vs. coordinator/executor) and the hard git rule. |
+| `docs/6-working-model.md` | **Operating** | How sessions are structured (solo vs. coordinator/subagents), the project's VCS and parallel-dispatch defaults, and the hard commit rule. |
 
 `docs/1-documentation-index.md` sits above these as the catalogue of the full `docs/` set.
 
 ## Working model & the git rule
 
 Sessions run in one of two modes, defined in `docs/6-working-model.md` (which records this
-project's default):
+project's defaults — mode, version control, parallel dispatch):
 
 - **Solo** — one session plans, implements, and reviews. The default for small work.
-- **Coordinator / executor** — a premium model coordinates (plans, decides, reviews) while cheaper
-  executor sessions and subagents implement, each driven by a written **work order**
-  (`work-orders/NNN-slug.md`). This keeps premium capacity on thinking and the coordinator's context
-  light. Dispatch with the **dispatch-work-order** skill; run an order with **execute-work-order**.
+- **Coordinator / subagents** — a premium session coordinates (plans, decides, reviews) while
+  **executor subagents** implement, each driven by a written **work order**
+  (`work-orders/<branch-slug>/NNN-slug.md` — numbered per branch so branches never collide). This
+  keeps premium capacity on thinking and the coordinator's context light. Dispatch with the
+  **dispatch-work-order** skill (which spawns the executor); the executor's contract is the
+  **execute-work-order** skill — in tools without subagents, a separate human-opened session
+  follows that same skill as the fallback vehicle.
 
 The mode is a default, not a lock — a solo project can still dispatch one heavy work order.
 
-**Git rule (hard, both modes):** the agent **never commits without explicit, per-commit human
-permission, and never pushes, rebases, or resets** — in any role, in any session. Its job is to
-*remind* when work is review-ready; commit messages are human-written where possible, and any
+**Version-control rule (hard, both modes, git or svn):** the agent **never commits without
+explicit, per-commit human permission, and never pushes, rebases, or resets** — in any role, in any
+session or subagent. On **svn** projects the bar is higher: `svn commit` publishes straight to the
+server, so agent commits are denied outright — the human always runs the commit. The agent's job is
+to *remind* when work is review-ready; commit messages are human-written where possible, and any
 agent-drafted message is a suggestion to edit, not an auto-applied commit. An executor ends its work
 at "ready to commit," never at "committed." (One narrow, opt-in exception — local
-autonomous-checkpoint commits for throwaway/exploratory work — is documented in
-`docs/6-working-model.md`.)
+autonomous-checkpoint commits for throwaway/exploratory work, **git projects only** — is documented
+in `docs/6-working-model.md`.)
 
 ## Facts worth knowing before you touch anything
 

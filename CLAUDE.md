@@ -7,7 +7,10 @@ file, not this one, for anything another agent should also know. This shell hold
 Claude Code-specific.
 
 - The session workflow skills in `.claude/skills/` are available as slash commands here:
-  `/init-project`, `/start-session`, `/save-context`, `/end-session`.
+  `/init-project`, `/start-session`, `/save-context`, `/end-session` — plus, on
+  coordinator/subagents projects, `/dispatch-work-order` and `/execute-work-order`. The `executor`
+  subagent type (`.claude/agents/executor.md`) is Claude Code-specific; other tools use a separate
+  executor session following the execute-work-order skill instead.
 - A `PreCompact` hook in `.claude/settings.json` reminds you to checkpoint STATUS before
   compaction. Honor it — run `/save-context` if STATUS is stale before context is condensed.
 

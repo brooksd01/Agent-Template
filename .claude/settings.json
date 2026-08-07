@@ -7,12 +7,18 @@
       "Bash(git show:*)",
       "Bash(git branch:*)",
       "Bash(git remote -v)",
-      "Bash(git stash list)"
+      "Bash(git stash list)",
+      "Bash(svn status:*)",
+      "Bash(svn log:*)",
+      "Bash(svn diff:*)",
+      "Bash(svn info:*)",
+      "Bash(svn list:*)"
     ],
     "deny": [
       "Bash(git push:*)",
       "Bash(git rebase:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(svn commit:*)"
     ]
   },
   "hooks": {

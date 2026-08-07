@@ -59,21 +59,28 @@ the loop: `AGENTS.md` tells the agent to proactively offer the close-out when yo
 context runs low, and (in Claude Code) a `PreCompact` hook reminds it to checkpoint STATUS before
 compaction.
 
-### Coordinator / executor working model (optional)
+### Coordinator / subagents working model (optional)
 
 For projects with sustained implementation work, the template supports a two-tier model: a
-premium, high-reasoning model **coordinates** (plans, decides, reviews) in one long-lived session,
-while cheaper **executor** sessions and subagents do the implementation — each driven by a written
-**work order** in `work-orders/`. This spends premium capacity only on thinking and keeps the
-coordinator's context light and long-lived, with the docs as rebootable memory if it's ever reset.
+premium, high-reasoning session **coordinates** (plans, decides, reviews) while **executor
+subagents** — spawned directly from the coordinator — do the implementation, each driven by a
+written **work order** in `work-orders/<branch-slug>/` (numbered per branch, so parallel branches
+never collide on names). This spends premium capacity only on thinking and keeps the coordinator's
+context light and long-lived, with the docs as rebootable memory if it's ever reset.
 
-- `docs/6-working-model.md` defines the model, the work-order contract, and a hard git rule
-  (the agent never commits without per-commit permission, and never pushes/rebases/resets —
-  enforced by `deny` rules in `.claude/settings.json`).
-- `/dispatch-work-order` (coordinator) drafts an order; `/execute-work-order NNN` (executor) runs
-  one in a separate session and reports back.
+- `docs/6-working-model.md` defines the model, the work-order contract (including the mandatory
+  per-dispatch delivery block: vehicle, model tier, isolation, scheduling), and a hard
+  version-control rule (the agent never commits without per-commit permission and never
+  pushes/rebases/resets; on svn, agent commits are denied outright — enforced by `deny` rules in
+  `.claude/settings.json`).
+- `/dispatch-work-order` (coordinator) drafts an order and spawns the executor subagent against
+  it. The executor's behavioral contract is `/execute-work-order` — a single source of truth
+  followed both by the `executor` subagent (`.claude/agents/executor.md` is a thin pointer to it)
+  and, in tools without subagents, by a separate human-opened executor session as the fallback
+  vehicle.
 - It's **opt-in per project** — `/init-project` records whether a project defaults to solo or
-  coordinator/executor, and the skills simply go unused on solo projects.
+  coordinator/subagents (plus its version control and whether parallel dispatch is allowed), and
+  the skills simply go unused on solo projects.
 
 ### Why not just the agent's built-in memory?
 
@@ -104,5 +111,8 @@ That's it — the project is initialized and the docs carry its memory forward.
   `.claude/settings.local.json`, which is gitignored. As your common commands settle, run
   `/fewer-permission-prompts` to extend the allowlist. Other tools bring their own permission
   systems.
-- **Git.** This template ships without git history. Run `git init` in your copy and commit when
-  you're ready.
+- **Version control.** Git and Subversion are both supported — `/init-project` asks which (some
+  organizations and project types mandate svn, so it's asked, not assumed). This template ships without
+  history: `git init` in your copy, or place it in your svn working copy, and commit when you're
+  ready. On svn projects the agent never commits at all (`svn commit` publishes immediately, so
+  it's denied); on git the agent may draft but the human approves every commit.

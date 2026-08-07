@@ -1,7 +1,7 @@
 ---
 name: start-session
 description: Orient a fresh context — read the project's status docs and git state, then brief where we are and what's next. Run this first each session.
-allowed-tools: Read Glob Grep Bash(git status:*) Bash(git log:*) Bash(git diff:*)
+allowed-tools: Read Glob Grep Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git branch:*) Bash(svn status:*) Bash(svn log:*) Bash(svn diff:*) Bash(svn info:*)
 ---
 
 You are starting a fresh working session on this project. Your job right now
@@ -21,15 +21,18 @@ anything until they direct you.
 3. `docs/2-project-status.md` — the living current-state. Read it fully.
 4. `docs/4-decision-log.md` — read the **last two dated sections** (most recent decisions) so you
    know what changed most recently. Don't re-read the whole file.
-5. Git state — run `git status` and `git log --oneline -10` to see uncommitted work and the
-   recent commit trail. If there's uncommitted work, look at `git diff --stat` to understand it.
-   (If the project isn't a git repo yet, note that and move on.)
-6. Work orders (only if the project uses the coordinator/executor model — check
-   `docs/6-working-model.md` for the default, or the presence of a `work-orders/` directory with
-   real orders). Scan `work-orders/` for any order not yet `done`: note which are `dispatched` or
-   `in progress` (out for execution) and which are `ready to commit` (a result report is waiting on
-   your review). You are booting as the **coordinator** — don't implement these; you review and
-   dispatch.
+5. Working-copy state — `docs/6-working-model.md` records whether this project runs on git or
+   svn. Git: `git status`, `git log --oneline -10`, and `git diff --stat` if there's uncommitted
+   work. svn: `svn status`, `svn log -l 10`, and `svn diff --summarize` if there are local
+   modifications. (If the project isn't under version control yet, note that and move on.)
+6. Work orders (only if the project uses the coordinator/subagents model — check
+   `docs/6-working-model.md` for the default, or the presence of `work-orders/` subdirectories
+   with real orders). Orders live in per-branch subdirectories (`work-orders/<branch-slug>/`);
+   scan the current branch's subdirectory first, then note any other branch's unfinished orders.
+   For any order not yet `done`: `dispatched` or `in progress` usually means a subagent run was
+   interrupted before reporting — the order needs re-dispatch; `ready to commit` means a result
+   report is waiting on your review. You are booting as the **coordinator** — don't implement
+   these; you review and dispatch.
 
 If anything in STATUS references a doc you need detail on, open that specific doc — but don't
 read the whole `docs/` tree speculatively. The INDEX tells you what's worth opening.
@@ -43,9 +46,10 @@ Produce a concise briefing with these parts:
 3. **Active / Up next / Blocked** — the near-term lists from STATUS, tightened to what matters.
 4. **Working-tree state** — uncommitted changes or anything that looks mid-flight or drifted
    from what STATUS claims; flag discrepancies between STATUS and reality explicitly.
-5. **Work orders in flight** (coordinator/executor projects only) — any orders out for execution,
-   and especially any `ready to commit` result reports awaiting your review. If a report is
-   waiting, reviewing it is usually the single next action.
+5. **Work orders in flight** (coordinator/subagents projects only) — any orders whose subagent
+   run was interrupted (`dispatched` / `in progress` with no result report), and especially any
+   `ready to commit` result reports awaiting your review. If a report is waiting, reviewing it is
+   usually the single next action.
 6. **Flags** — any open decisions awaiting the user, and any doc gaps STATUS calls out.
 
 **If STATUS clearly contradicts reality** — commits it doesn't know about, "Active now" items that
