@@ -60,23 +60,6 @@ and follow the corresponding `SKILL.md`**:
 - **Never let known-stale state ride.** If you notice STATUS contradicting reality (git history,
   files on disk), say so and offer to reconcile immediately.
 
-### Asking the developer questions
-
-**Project preference:** _[set by init-project — `text` or `pop-up`]_
-
-Two styles, chosen per project by the developer during init-project:
-
-- **`text` (the default)** — when you need a decision or clarification, ask in the body of your
-  reply, as numbered questions when there is more than one, so each can be answered in turn. Don't
-  reach for structured/pop-up prompts (e.g. Claude Code's AskUserQuestion); they hide the
-  surrounding text the reader needs before answering.
-- **`pop-up`** — use structured question prompts for discrete decisions (yes/no calls, picking
-  between named options), keeping the essential context inside the prompt itself; fall back to
-  text for anything that needs surrounding discussion to answer well.
-
-Whichever is set, it's a default, not a lock — the developer can ask for the other format at any
-moment, and one-off requests override the preference for that exchange.
-
 ## The document hierarchy
 
 | File | Horizon | Role |
@@ -85,20 +68,21 @@ moment, and one-off requests override the preference for that exchange.
 | `docs/3-project-roadmap.md` | **Strategic** | Phase-by-phase plan and status. Changes when a phase moves. |
 | `docs/5-deferred-items.md` | **Someday/maybe** | Consciously-punted items, each with a revisit *trigger*. |
 | `docs/4-decision-log.md` | **Permanent** | Append-only, dated decisions *and their rationale*. Never rewrite; append. |
-| `docs/6-working-model.md` | **Operating** | How sessions are structured (solo vs. coordinator/subagents), the project's VCS and parallel-dispatch defaults, and the hard commit rule. |
+| `docs/6-working-model.md` | **Operating** | How sessions are structured (solo vs. coordinator/subagents), the project's VCS, parallel-dispatch, and model-tier defaults, and the hard commit rule. |
 
 `docs/1-documentation-index.md` sits above these as the catalogue of the full `docs/` set.
 
 ## Working model & the git rule
 
 Sessions run in one of two modes, defined in `docs/6-working-model.md` (which records this
-project's defaults — mode, version control, parallel dispatch):
+project's defaults — mode, version control, parallel dispatch, model tiers):
 
 - **Solo** — one session plans, implements, and reviews. The default for small work.
-- **Coordinator / subagents** — a premium session coordinates (plans, decides, reviews) while
+- **Coordinator / subagents** — one long-lived session coordinates (plans, decides, reviews) while
   **executor subagents** implement, each driven by a written **work order**
   (`work-orders/<branch-slug>/NNN-slug.md` — numbered per branch so branches never collide). This
-  keeps premium capacity on thinking and the coordinator's context light. Dispatch with the
+  keeps the coordinator's context light, with mechanical work optionally on a cheaper model tier.
+  Model choice per role lives in one table in `docs/6-working-model.md`. Dispatch with the
   **dispatch-work-order** skill (which spawns the executor); the executor's contract is the
   **execute-work-order** skill — in tools without subagents, a separate human-opened session
   follows that same skill as the fallback vehicle.

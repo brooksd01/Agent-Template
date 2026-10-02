@@ -1,7 +1,7 @@
 # Working Model — Coordinator / Subagents
 
 **Purpose:** How agent sessions are structured on this project. Two operating modes: **solo**
-(one session does everything) and **coordinator/subagents** (a premium session coordinates;
+(one session does everything) and **coordinator/subagents** (one long-lived session coordinates;
 subagents execute work orders). This doc defines the coordinator/subagent model and the rules that
 hold whichever mode is in play. `init-project` records the project's defaults below.
 
@@ -11,6 +11,13 @@ hold whichever mode is in play. `init-project` records the project's defaults be
 - **Version control:** _[`git` or `svn`]_
 - **Parallel dispatch:** _[`serial` (default) or `parallel-allowed` — git projects only; svn is
   always serial for overlapping work. See "Working-tree hygiene."]_
+- **Model tiers:** _[one Claude Code alias per role — see "Model tiers" below]_
+
+  | Role | Covers | Model |
+  |---|---|---|
+  | **Coordinator** | The main session — planning, decisions, review | _[e.g. `opus`]_ |
+  | **Standard executor** | Most implementation work orders | _[e.g. `opus`]_ |
+  | **Light executor** | Mechanical / well-specified orders; recon and search subagents | _[e.g. `sonnet`]_ |
 
 > These are **defaults, not locks.** A solo-default project can still dispatch a work order for one
 > heavy task; a coordinator project can still do small things inline; a serial project can run one
@@ -20,14 +27,41 @@ hold whichever mode is in play. `init-project` records the project's defaults be
 
 ## Why this model
 
-Two goals: spend premium-model capacity only on planning, decisions, and review; and keep the
-coordinator's context light and long-lived by pushing all detail churn into disposable contexts.
+The primary goal is **context isolation**: keep the coordinator's context light and long-lived by
+pushing all detail churn — file reads, build output, fix loops — into disposable subagent contexts.
 The five-doc system is what makes the coordinator *cheaply rebootable* — long-lived is the
 optimization, cheaply-reborn is the fallback, and the docs are the fallback's fuel.
 
+The secondary goal is **cost**: mechanical work can run on a cheaper model tier. This matters less
+than it once did — adjacent model tiers are now only a few times apart in price, and a capable
+model often finishes a task in fewer turns — so many projects run their standard executor on the
+same model as the coordinator and reserve the light tier for genuinely easy work.
+
+## Model tiers
+
+The project's tier table lives in **Project defaults** above, and is the one place model choice is
+recorded. Everything else — work orders, the dispatch skill — refers to tiers by role
+(`coordinator-tier`, `standard`, `light`), never by model name, so a model change is a one-line
+edit here.
+
+- Models are recorded as **Claude Code aliases** (`fable`, `opus`, `sonnet`, `haiku`), which track
+  the latest release in each family, so new versions flow in without doc edits. In other tools, use
+  that tool's equivalent tier.
+- The coordinator is whatever model the main session runs on; init-project proposes the model it
+  was itself run on.
+- `.claude/agents/executor.md` declares the **standard** tier as its default `model:`, so a dispatch
+  that forgets to name a model falls back to the standard tier rather than silently inheriting the
+  coordinator's (which can be the most expensive tier). The `model` passed on each Agent call
+  overrides it.
+- Three roles is deliberate. Add a separate recon tier only if a cheaper model class becomes worth
+  routing to on its own.
+- The table is a **project** default, shared by everyone on it. Anyone can deviate for a given
+  dispatch; change the table only when the project's default should change.
+
 ## Roles
 
-**Coordinator** (premium model; one long-lived session — the normal `/start-session` session)
+**Coordinator** (coordinator-tier model; one long-lived session — the normal `/start-session`
+session)
 - Owns planning, task decomposition, architectural decisions, and result review.
 - Writes work orders; dispatches subagents against them; reads result reports. Delegates bulk
   review rather than reading diffs and logs directly — **but** this is a context-budget rule, not
@@ -50,19 +84,19 @@ tool as the `executor` agent type)
   needed) and re-dispatches.
 - Write a structured result report per work order, then stop at **ready to commit**. Their context
   evaporates when they return — anything durable lives in the code and the report.
-- Model tier is a **per-dispatch decision**, not fixed: the coordinator passes `model` on the
-  Agent call (workhorse tier for mechanical orders; same-tier for genuinely hard ones).
+- Model tier is a **per-dispatch decision**: the coordinator picks a tier in the delivery block
+  and passes the matching alias from the tier table as `model` on the Agent call (`light` for
+  mechanical orders, `standard` for most, `coordinator-tier` for genuinely hard ones).
 
 **Fallback: executor session** (a separate human-opened session, same working tree)
 - The same contract, delivered by hand: open a session, run `/execute-work-order <path>` (or point
-  any other agent at the same SKILL.md). Use it when the tool in play has no subagents
-  (Codex/Cursor/Gemini/etc.), or for an unusually large order that wants an interactive,
-  long-running session.
+  any other agent at the same SKILL.md). Use it when the tool in play lacks subagent support, or
+  for an unusually large order that wants an interactive, long-running session.
 - Everything in this doc that applies to executor subagents applies to a fallback session, plus
   the two-sessions-one-tree hygiene rules below.
 
 **Recon & review subagents** (spawned from the coordinator, no work order needed)
-- Read-only recon ("how does X work", codebase sweeps) via cheap search agents.
+- Read-only recon ("how does X work", codebase sweeps) via search agents on the light tier.
 - Review passes over an executor's diff — the coordinator reads only the findings.
 - Micro-tasks too small to justify a work order.
 
@@ -87,7 +121,8 @@ The order carries scope, files in play, acceptance criteria, constraints, and a 
 
 1. **Vehicle** — executor subagent (default) | fallback executor session | inline (coordinator
    does it; only for trivia below work-order threshold).
-2. **Model tier** — workhorse or premium, with a one-line why.
+2. **Model tier** — `light`, `standard`, or `coordinator-tier` (resolved through the tier table
+   above), with a one-line why.
 3. **Isolation** — shared working tree (default) or isolated worktree (git only; required for
    parallel orders touching overlapping files).
 4. **Scheduling** — serial (default) or parallel with named sibling orders; must respect the
@@ -173,7 +208,8 @@ dispatch would race.
 
 ## Failure modes this guards against
 
-- **Premium-model burn on mechanical work** → per-dispatch model tier on executor subagents.
+- **Top-tier model burn on mechanical work** → per-dispatch model tier on executor subagents, and a
+  standard-tier default on the executor so a forgotten `model` doesn't inherit the coordinator's.
 - **Coordinator context bloat → compaction → plan drift** → churn quarantined in disposable
   subagent contexts; docs as rebootable memory.
 - **Delegation decisions made from memory mid-flow** → the delivery block is a mandatory

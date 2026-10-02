@@ -16,7 +16,8 @@
 
 ### Delivery block _(mandatory — fill every line, every time)_
 - **Vehicle:** _executor subagent_ (default) | _fallback executor session_ | _inline_
-- **Model tier:** _workhorse_ | _premium_ — _[one line why]_
+- **Model tier:** _light_ | _standard_ (default) | _coordinator-tier_ — _[one line why]_ (alias
+  from the tier table in `docs/6-working-model.md`)
 - **Isolation:** _shared tree_ (default) | _isolated worktree_ (git only; required if this order
   runs parallel to another touching overlapping files)
 - **Scheduling:** _serial_ (default) | _parallel with WO-NNN, …_ — must respect the project's

@@ -1,7 +1,8 @@
 ---
 name: executor
-description: Work-order executor — implements a single work order from work-orders/<branch-slug>/, appends a structured result report to it, and stops at ready-to-commit. Dispatch via the dispatch-work-order skill; the prompt must name the work-order file path. Model tier is chosen per-dispatch on the Agent call, not fixed here.
+description: Work-order executor — implements a single work order from work-orders/<branch-slug>/, appends a structured result report to it, and stops at ready-to-commit. Dispatch via the dispatch-work-order skill; the prompt must name the work-order file path. The model below is the project's standard executor tier (set by init-project); the dispatch overrides it per order.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: opus
 ---
 
 You are an **executor** subagent for exactly one work order.

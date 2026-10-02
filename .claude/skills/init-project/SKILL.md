@@ -35,19 +35,13 @@ of them. Lead with the essentials (name + what it is), then go deeper. Cover, at
 - **How they want to work** — review/commit habits, environment quirks, anything that should shape
   day-to-day behavior. (User-level preferences already apply — capture only project-specific
   additions here.)
-- **Question format** — when the agent needs a decision or clarification, should it ask in
-  **text** (numbered questions in the reply body — the default; keeps the surrounding context
-  visible while answering) or via **pop-up** prompts (structured pickers like Claude Code's
-  AskUserQuestion — faster for discrete yes/no or option choices, but they hide the reply text
-  behind the prompt)? Sets the per-project preference in `AGENTS.md`; either way it's a default
-  the developer can override in the moment.
 - **Version control** — **git or Subversion?** Often this isn't a choice — some organizations and
   project types mandate svn, full stop — so ask which applies rather than assuming git. The answer
   changes real behavior (see `docs/6-working-model.md`): on svn there is no agent commit at all
   (`svn commit` publishes straight to the server and is denied), no autonomous-checkpoint mode,
   and no worktree isolation for parallel work.
 - **Working mode** — will this project run **solo** (one session does everything) or
-  **coordinator/subagents** (a premium session coordinates — plans, decides, reviews — while
+  **coordinator/subagents** (one long-lived session coordinates — plans, decides, reviews — while
   executor subagents implement via written work orders)? See `docs/6-working-model.md` for the
   distinction. This sets the project's default mode; it's a default, not a lock. Default to
   **solo** unless the developer expects sustained, heavy implementation work that would benefit
@@ -60,6 +54,17 @@ of them. Lead with the essentials (name + what it is), then go deeper. Cover, at
   starts, which is the safer default if this workflow is new to you or the codebase is
   unfamiliar.* Default to **serial**. On svn projects, record serial without belaboring it —
   Subversion has no worktrees, so parallel overlapping work isn't safe there anyway.
+- **Model tiers** — which model runs each role (see "Model tiers" in `docs/6-working-model.md`).
+  Propose rather than interrogate: the model *this* session is running on is the likely
+  coordinator, so name it and offer the defaults in one question — e.g. *"This session is running
+  on Opus. Is that what you'll normally coordinate with? For implementation I'd suggest the same
+  model for most work and Sonnet for easier or mechanical tasks — want anything different?"*
+  Defaults when the developer has no opinion: **coordinator** = this session's model;
+  **standard executor** = the same; **light executor** (also recon/search subagents) = `sonnet`.
+  If you can't tell what model you're running on, ask. Record Claude Code aliases (`fable`,
+  `opus`, `sonnet`, `haiku`), not version numbers. Solo projects need only the coordinator and
+  light rows (solo sessions still spawn recon subagents); fill standard with the coordinator's
+  model.
 - **Kickoff decisions already made** — any approach/architecture calls already settled, with the why.
   These seed the decision log.
 
@@ -71,9 +76,7 @@ existing material (a brief, a related repo, notes), read it and fold it in rathe
 Summarize what you heard in a few lines and confirm before writing. Then populate:
 
 - **`AGENTS.md`** — fill in *What this project is* and *Facts worth knowing before you touch
-  anything*; set the title; set the **Project preference** line in *Asking the developer
-  questions* to `text` or `pop-up` from the interview; **remove the uninitialized-template
-  banner.** Keep the operating-model sections (how-we-work, session workflow, standing
+  anything*; set the title; **remove the uninitialized-template banner.** Keep the operating-model sections (how-we-work, session workflow, standing
   instructions, doc hierarchy) intact. Leave the `CLAUDE.md` shell alone — it just imports this
   file.
 - **`README.md`** — **replace it.** The template ships with a README that describes the template
@@ -91,10 +94,16 @@ Summarize what you heard in a few lines and confirm before writing. Then populat
 - **`docs/5-deferred-items.md`** — add any consciously-punted items surfaced in the interview (only if
   real); otherwise leave the scaffold.
 - **`docs/6-working-model.md`** — fill in the **Project defaults** block from the interview:
-  mode (`solo` or `coordinator/subagents`), version control (`git` or `svn`), and parallel
-  dispatch (`serial` or `parallel-allowed`). Leave the rest of the doc as-is (it's the standing
+  mode (`solo` or `coordinator/subagents`), version control (`git` or `svn`), parallel
+  dispatch (`serial` or `parallel-allowed`), and the **Model tiers** table (replace the `e.g.`
+  placeholders with the chosen aliases). Leave the rest of the doc as-is (it's the standing
   model, not project-specific). If the project is solo, a one-line note that the
   coordinator/subagents option remains available is enough.
+- **`.claude/agents/executor.md`** (Claude Code only) — set the `model:` frontmatter line to the
+  **standard executor** alias from the tier table. Change nothing else in that file.
+- **`.gitignore`** — the template ships with only the agent-local settings entry. Add the standard
+  ignores for the project's stack (build output, dependency directories, IDE folders, local env
+  files). Keep the `.claude/settings.local.json` line.
 - **`docs/1-documentation-index.md`** — flip operating-set rows (including `6-working-model.md`)
   from 🌱 Scaffold to ✅ Verified as they fill in, stamp dates, and add rows for any
   project/reference docs the developer pointed at.

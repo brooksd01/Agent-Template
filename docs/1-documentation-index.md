@@ -23,7 +23,7 @@ what to read. **Consult this before opening docs by guesswork.**
 2. **`2-project-status.md`** — where we are right now, what's next, what's blocked.
 3. **`3-project-roadmap.md`** — strategic phase plan.
 4. **`4-decision-log.md`** — decisions + rationale; the most authoritative file.
-5. **`6-working-model.md`** — the session/working model, the project's VCS + parallel-dispatch defaults, and the hard commit rule; read if this project uses the coordinator/subagents split.
+5. **`6-working-model.md`** — the session/working model, the project's VCS, parallel-dispatch, and model-tier defaults, and the hard commit rule; read if this project uses the coordinator/subagents split.
 
 ---
 
@@ -36,7 +36,7 @@ what to read. **Consult this before opening docs by guesswork.**
 | `3-project-roadmap.md` | Strategic phase/workstream plan — sequencing and risks. | 🌱 Scaffold | — |
 | `4-decision-log.md` | Append-only, dated decisions with rationale. | 🌱 Scaffold | — |
 | `5-deferred-items.md` | Consciously-punted items, each with a revisit trigger. | 🌱 Scaffold | — |
-| `6-working-model.md` | How sessions are structured (solo vs. coordinator/subagents), VCS + parallel-dispatch defaults, + the hard commit rule. | 🌱 Scaffold | — |
+| `6-working-model.md` | How sessions are structured (solo vs. coordinator/subagents), VCS, parallel-dispatch + model-tier defaults, + the hard commit rule. | 🌱 Scaffold | — |
 
 ---
 

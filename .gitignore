@@ -1,10 +1,4 @@
-# Build output
-[Bb]in/
-[Oo]bj/
-.vs/
-
-# Node
-**/node_modules/
-
 # Local Claude Code settings (machine-local perms / secrets)
 .claude/settings.local.json
+
+# Stack-specific ignores (build output, dependencies, IDE folders) are added by init-project.

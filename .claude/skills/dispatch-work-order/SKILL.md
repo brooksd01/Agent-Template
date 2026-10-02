@@ -27,8 +27,10 @@ Four decisions, **mandatory every time** — fill them in the order, don't leave
 1. **Vehicle** — *executor subagent* is the default for anything with a build-test-fix loop.
    *Fallback executor session* only when the tool in play has no subagents, or the order is
    unusually large and wants an interactive long-running session. *Inline* only for trivia.
-2. **Model tier** — workhorse for mechanical/well-specified orders; premium when the order needs
-   real judgment. One-line justification.
+2. **Model tier** — `standard` by default; `light` for mechanical/well-specified orders;
+   `coordinator-tier` only when the order needs judgment beyond the standard tier. Resolve the
+   tier to its alias via the **Model tiers** table in `docs/6-working-model.md`. One-line
+   justification.
 3. **Isolation** — shared tree by default. Isolated worktree (git only) is **required** if this
    order will run parallel to another order touching overlapping files.
 4. **Scheduling** — serial by default. Parallel only if the project's parallel-dispatch default in
@@ -60,7 +62,8 @@ Don't touch the decision log or roadmap here.
 ## 5. Dispatch
 
 - **Executor subagent (default):** spawn it now from this session via the Agent tool —
-  `subagent_type: executor`, `model` per the delivery block, worktree isolation if the block says
+  `subagent_type: executor`, `model` set to the alias for the delivery block's tier (always pass
+  it explicitly — don't rely on the agent's default), worktree isolation if the block says
   so, and a prompt naming the work-order file path (e.g. *"Execute the work order at
   `work-orders/feature-auth/003-slug.md`."*). For parallel orders, spawn the siblings in one
   message so they run concurrently.

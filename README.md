@@ -42,7 +42,7 @@ and catalogued in the index so a fresh context can find them.
 ### The session workflow (`.claude/skills/`)
 
 Four skills in the open [Agent Skills](https://agentskills.io) format (`SKILL.md`), which is read
-by Claude Code and 30+ other tools. In Claude Code they're slash commands; in other agents,
+by Claude Code and many other tools. In Claude Code they're slash commands; in other agents,
 `AGENTS.md` instructs the agent to read and follow the relevant `SKILL.md` when you ask for it by
 name.
 
@@ -61,15 +61,18 @@ compaction.
 
 ### Coordinator / subagents working model (optional)
 
-For projects with sustained implementation work, the template supports a two-tier model: a
-premium, high-reasoning session **coordinates** (plans, decides, reviews) while **executor
-subagents** — spawned directly from the coordinator — do the implementation, each driven by a
-written **work order** in `work-orders/<branch-slug>/` (numbered per branch, so parallel branches
-never collide on names). This spends premium capacity only on thinking and keeps the coordinator's
-context light and long-lived, with the docs as rebootable memory if it's ever reset.
+For projects with sustained implementation work, the template supports a two-tier model: one
+long-lived session **coordinates** (plans, decides, reviews) while **executor subagents** —
+spawned directly from the coordinator — do the implementation, each driven by a written **work
+order** in `work-orders/<branch-slug>/` (numbered per branch, so parallel branches never collide on
+names). The main payoff is a coordinator whose context stays light and long-lived, because file
+reads, build output, and fix loops happen in disposable subagent contexts, with the docs as
+rebootable memory if it's ever reset. Mechanical work can also run on a cheaper model.
 
-- `docs/6-working-model.md` defines the model, the work-order contract (including the mandatory
-  per-dispatch delivery block: vehicle, model tier, isolation, scheduling), and a hard
+- `docs/6-working-model.md` defines the model, the project's **model tiers** (one table mapping
+  coordinator / standard executor / light executor to a model, chosen during `/init-project`), the
+  work-order contract (including the mandatory per-dispatch delivery block: vehicle, model tier,
+  isolation, scheduling), and a hard
   version-control rule (the agent never commits without per-commit permission and never
   pushes/rebases/resets; on svn, agent commits are denied outright — enforced by `deny` rules in
   `.claude/settings.json`).
@@ -79,7 +82,8 @@ context light and long-lived, with the docs as rebootable memory if it's ever re
   and, in tools without subagents, by a separate human-opened executor session as the fallback
   vehicle.
 - It's **opt-in per project** — `/init-project` records whether a project defaults to solo or
-  coordinator/subagents (plus its version control and whether parallel dispatch is allowed), and
+  coordinator/subagents (plus its version control, whether parallel dispatch is allowed, and which
+  model runs each role), and
   the skills simply go unused on solo projects.
 
 ### Why not just the agent's built-in memory?
