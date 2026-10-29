@@ -8,6 +8,8 @@ Horizon: **now**. For the strategic plan see `3-project-roadmap.md`; for punted 
 triggers see `5-deferred-items.md`; for decisions + rationale see `4-decision-log.md`.
 
 **Last updated:** _[stamped on first update]_
+**Autonomy envelope:** _none active_ _(during an unattended run: the window, real blockers, budget,
+and whether checkpoint commits are on — see "Unattended runs" in `6-working-model.md`)_
 
 ---
 
@@ -34,3 +36,10 @@ _(Nothing yet.)_
 ## Open decisions
 
 _(Nothing yet.)_
+
+### Parked (default applied)
+
+_(Questions an unattended run answered provisionally rather than block on. Each entry: the
+question, the default taken, and where it was applied. The human answers them as a batch on
+return — confirmed ones go to the decision log, reversed ones become actions. Empty outside
+unattended runs.)_

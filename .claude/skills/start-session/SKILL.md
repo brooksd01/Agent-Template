@@ -25,12 +25,18 @@ anything until they direct you.
    svn. Git: `git status`, `git log --oneline -10`, and `git diff --stat` if there's uncommitted
    work. svn: `svn status`, `svn log -l 10`, and `svn diff --summarize` if there are local
    modifications. (If the project isn't under version control yet, note that and move on.)
+   **Split layout** (`Layout: split` in `docs/6-working-model.md`): do this for the harness *and*
+   for each code repo in the Code repositories table, by path — `git -C repos/<name> status`,
+   `svn status repos/<name>` — noting each repo's current branch. A code repo missing from
+   `repos/` means this machine isn't set up yet; say so.
 6. Work orders (only if the project uses the coordinator/subagents model — check
    `docs/6-working-model.md` for the default, or the presence of `work-orders/` subdirectories
-   with real orders). Orders live in per-branch subdirectories (`work-orders/<branch-slug>/`);
+   with real orders). Orders live in per-branch subdirectories (`work-orders/<branch-slug>/`, or
+   `work-orders/<repo>/<branch-slug>/` on split projects, keyed to each code repo's branch);
    scan the current branch's subdirectory first, then note any other branch's unfinished orders.
    For any order not yet `done`: `dispatched` or `in progress` usually means a subagent run was
-   interrupted before reporting — the order needs re-dispatch; `ready to commit` means a result
+   interrupted before reporting — the order needs re-dispatch (if its progress log has entries,
+   the executor will resume from them); `ready to commit` means a result
    report is waiting on your review. You are booting as the **coordinator** — don't implement
    these; you review and dispatch.
 
@@ -45,12 +51,16 @@ Produce a concise briefing with these parts:
 2. **The single next action** — the one thing to do first, drawn from STATUS "Active now".
 3. **Active / Up next / Blocked** — the near-term lists from STATUS, tightened to what matters.
 4. **Working-tree state** — uncommitted changes or anything that looks mid-flight or drifted
-   from what STATUS claims; flag discrepancies between STATUS and reality explicitly.
+   from what STATUS claims; flag discrepancies between STATUS and reality explicitly. On split
+   projects, one line per repo (harness first), with its branch.
 5. **Work orders in flight** (coordinator/subagents projects only) — any orders whose subagent
    run was interrupted (`dispatched` / `in progress` with no result report), and especially any
    `ready to commit` result reports awaiting your review. If a report is waiting, reviewing it is
    usually the single next action.
-6. **Flags** — any open decisions awaiting the user, and any doc gaps STATUS calls out.
+6. **Flags** — any open decisions awaiting the user, and any doc gaps STATUS calls out. If STATUS
+   shows an **autonomy envelope** still active, or entries under **Parked (default applied)**, say
+   so prominently: the parked defaults are provisional until the user answers them, and the
+   envelope should be closed now that they're back.
 
 **If STATUS clearly contradicts reality** — commits it doesn't know about, "Active now" items that
 are visibly done on disk, a blocked item whose blocker is gone — don't just flag it: offer to

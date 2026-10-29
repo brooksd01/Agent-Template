@@ -76,6 +76,13 @@ rebootable memory if it's ever reset. Mechanical work can also run on a cheaper 
   version-control rule (the agent never commits without per-commit permission and never
   pushes/rebases/resets; on svn, agent commits are denied outright — enforced by `deny` rules in
   `.claude/settings.json`).
+- Work orders carry work forward between executors: each keeps a **progress log** (so an
+  interrupted run resumes rather than restarts) and ends with a **Shortfall** section (what didn't
+  land) and **Notes for later orders** (binding on orders that depend on it). Lessons that apply
+  everywhere become **standing rules** in `AGENTS.md`, which every order inherits.
+- For long runs while you're away, you can grant an **autonomy envelope** for that run: real
+  blockers still stop it, and everything else gets a conservative default recorded under
+  **Parked** in STATUS, for you to answer as a batch when you're back.
 - `/dispatch-work-order` (coordinator) drafts an order and spawns the executor subagent against
   it. The executor's behavioral contract is `/execute-work-order` — a single source of truth
   followed both by the `executor` subagent (`.claude/agents/executor.md` is a thin pointer to it)
@@ -85,6 +92,20 @@ rebootable memory if it's ever reset. Mechanical work can also run on a cheaper 
   coordinator/subagents (plus its version control, whether parallel dispatch is allowed, and which
   model runs each role), and
   the skills simply go unused on solo projects.
+
+### Split layout: harness and code in separate repos (optional)
+
+By default the docs, agent tooling, and code share one repo. A project can instead run **split**:
+this repo becomes the *harness* — docs, work orders, `.claude/`, `AGENTS.md` — and the code lives
+in one or more separate repos cloned under `repos/<name>/` (gitignored here). The code repos stay
+free of agent tooling, so later developers can use their own setup or none; each carries a short
+`AI-HARNESS.md` pointing back to the harness for reference and history. One harness can also drive
+several code repos.
+
+The trade-offs: commits happen in two places (tied together by work-order references), overlapping
+work in a code repo runs serially, and you always launch the agent from the harness root, since
+that's where the settings and guardrails live. `/init-project` asks which layout you want;
+`docs/6-working-model.md` ("Split layout") has the detail.
 
 ### Why not just the agent's built-in memory?
 

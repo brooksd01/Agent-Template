@@ -19,7 +19,8 @@ loop that keeps the docs canonical.
 
 - Run `git status`, `git log --oneline` (since the session start if you can tell, else last few),
   and `git diff --stat` to see what changed on disk. (svn projects: `svn status`, `svn log -l 10`,
-  `svn diff --summarize`.)
+  `svn diff --summarize`.) On split-layout projects, do this for the harness and for each code repo
+  in the Code repositories table, by path (`git -C repos/<name> …`, `svn status repos/<name>`).
 - Review this conversation for: decisions made, work completed, things tried and abandoned, new
   problems discovered, and anything deferred.
 - Write yourself a short internal summary before touching any file.
@@ -29,6 +30,9 @@ loop that keeps the docs canonical.
 - **`docs/2-project-status.md`** — the main one. Update "Where we are"; check off completed "Active now"
   items; add newly-discovered actions; move things between Active / Up next / Blocked; update
   open decisions. Keep it current, not append-only — stale items should be removed or resolved.
+  The exception is **Parked (default applied)**: entries stay until the user answers them — never
+  drop one silently. If an unattended run's envelope is still marked active and the user is back,
+  say so: offer to walk the Parked list as a batch and clear the envelope marker.
 - **`docs/4-decision-log.md`** — this is now a **completeness check**, not the primary write.
   Decisions should already have been appended *as they were made* (see the log-as-you-go standing
   instruction in `AGENTS.md`). Scan the session for any decision that landed but never made it into
@@ -56,7 +60,9 @@ stale — this is the only point in the loop where doc rot gets caught.
   but not yet logged (log-as-you-go should have caught most; this backstops the gaps).
 - Moving finished items out of Active.
 - Marking completed work orders `done` in `work-orders/<branch-slug>/` (coordinator/subagents
-  projects).
+  projects) — once every item in the order's **Shortfall** has been routed somewhere durable
+  (STATUS, a follow-up order, or a deferred item). An unrouted Shortfall item goes into STATUS
+  first.
 
 **Confirm before applying** (judgment calls) — propose, then wait for the user's yes:
 - Marking any doc 🔴 Obsolete or ⚠️ Suspect.
@@ -72,7 +78,10 @@ Show a summary of everything you changed, grouped into **Auto-applied** and
 only after the user approves.
 
 Finish by asking whether to commit (don't commit unless asked) and noting the single most
-important thing for the next session's "Where we are."
+important thing for the next session's "Where we are." On split-layout projects, list each repo
+with uncommitted work separately — the harness and each code repo commit on their own — and for
+any work order committed this session, remind the coordinator to record the code commit on its
+**Commits** line.
 
 > Use today's date for all stamps. Preserve each document's established format and voice —
 > these docs are read cold by future contexts, so consistency matters more than your own phrasing.

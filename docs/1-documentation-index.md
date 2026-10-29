@@ -23,7 +23,7 @@ what to read. **Consult this before opening docs by guesswork.**
 2. **`2-project-status.md`** — where we are right now, what's next, what's blocked.
 3. **`3-project-roadmap.md`** — strategic phase plan.
 4. **`4-decision-log.md`** — decisions + rationale; the most authoritative file.
-5. **`6-working-model.md`** — the session/working model, the project's VCS, parallel-dispatch, and model-tier defaults, and the hard commit rule; read if this project uses the coordinator/subagents split.
+5. **`6-working-model.md`** — the session/working model, the project's layout, VCS, parallel-dispatch, and model-tier defaults, unattended runs, and the hard commit rule; read if this project uses the coordinator/subagents split or the split repo layout.
 
 ---
 
@@ -36,7 +36,7 @@ what to read. **Consult this before opening docs by guesswork.**
 | `3-project-roadmap.md` | Strategic phase/workstream plan — sequencing and risks. | 🌱 Scaffold | — |
 | `4-decision-log.md` | Append-only, dated decisions with rationale. | 🌱 Scaffold | — |
 | `5-deferred-items.md` | Consciously-punted items, each with a revisit trigger. | 🌱 Scaffold | — |
-| `6-working-model.md` | How sessions are structured (solo vs. coordinator/subagents), VCS, parallel-dispatch + model-tier defaults, + the hard commit rule. | 🌱 Scaffold | — |
+| `6-working-model.md` | How sessions are structured (solo vs. coordinator/subagents), layout (single vs. split), VCS, parallel-dispatch + model-tier defaults, unattended runs, + the hard commit rule. | 🌱 Scaffold | — |
 
 ---
 
@@ -54,8 +54,9 @@ so a fresh context can find them. Add a row per doc with its purpose and status.
 _(No project documents yet — init-project and ongoing work populate this.)_
 
 **`work-orders/`** — for coordinator/subagents projects, the work orders and their result reports,
-in per-branch subdirectories (`<branch-slug>/NNN-slug.md`, from `TEMPLATE.md`; numbering is
-sequential within each branch, so merges never collide). Committed as project history: the record
+in per-branch subdirectories (`<branch-slug>/NNN-slug.md`, or `<repo>/<branch-slug>/NNN-slug.md`
+on split-layout projects, from `TEMPLATE.md`; numbering is sequential within each branch, so
+merges never collide). Committed as project history: the record
 of what each delegated task scoped, and what worked or didn't in the build. See
 `docs/6-working-model.md`.
 
@@ -66,5 +67,9 @@ of what each delegated task scoped, and what worked or didn't in the build. See
 Point here to load-bearing material that lives outside `docs/` — source codebases the project builds
 on, related repos, read-only reference trees, external systems. Note each one's location, purpose, and
 whether it's authoritative or historical.
+
+On **split-layout** projects, also list each code repo's own docs here (setup, architecture,
+runbooks — paths under `repos/<name>/`), since that's where the docs maintainers need live. Give
+them the same Status marks as the docs above.
 
 _(None yet.)_

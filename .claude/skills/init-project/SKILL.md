@@ -32,6 +32,13 @@ of them. Lead with the essentials (name + what it is), then go deeper. Cover, at
 - **Off-limits / read-only areas** — vendored code, generated files, external systems, anything an
   agent must not modify.
 - **External dependencies** — services, APIs, other repos, related systems this leans on.
+- **Data access & sensitivity** — skip if the project touches no real data. Otherwise: what data
+  is involved (databases, customer records, production systems); what the agent may see (full
+  rows, or only counts and aggregates); how it gets access (ideally a dedicated, least-privilege
+  login and a read-only query path); where it may write, and what's strictly read-only; and whether
+  outbound side effects — email, webhooks, third-party API calls — must be fenced off outside
+  production. If the agent will need data access to do the work, suggest arranging it early:
+  analysis done from code alone, before real data is available, tends to get redone.
 - **How they want to work** — review/commit habits, environment quirks, anything that should shape
   day-to-day behavior. (User-level preferences already apply — capture only project-specific
   additions here.)
@@ -40,6 +47,16 @@ of them. Lead with the essentials (name + what it is), then go deeper. Cover, at
   changes real behavior (see `docs/6-working-model.md`): on svn there is no agent commit at all
   (`svn commit` publishes straight to the server and is denied), no autonomous-checkpoint mode,
   and no worktree isolation for parallel work.
+- **Repository layout** — **single** (the default: code and these docs share one repo) or
+  **split** (this repo becomes the *harness* — docs, work orders, agent tooling — and the code
+  lives in one or more separate repos cloned under `repos/<name>/`). Explain the trade-off in plain
+  terms: *split keeps the code repo free of agent tooling, so later developers can bring their own
+  setup or none, and lets one harness drive several repos (say, web and mobile). The cost is two
+  repos to commit to, a little cross-referencing between them, and no parallel work in
+  overlapping code.* Default to **single** unless the developer wants the code repo kept clean or
+  expects several code repos. If split, for each code repo: a short name, the clone URL, its VCS,
+  its default branch, and whether it already exists or is new. Ask the harness's own VCS
+  separately (recommend git — it can be git even when a code repo must be svn).
 - **Working mode** — will this project run **solo** (one session does everything) or
   **coordinator/subagents** (one long-lived session coordinates — plans, decides, reviews — while
   executor subagents implement via written work orders)? See `docs/6-working-model.md` for the
@@ -76,8 +93,12 @@ existing material (a brief, a related repo, notes), read it and fold it in rathe
 Summarize what you heard in a few lines and confirm before writing. Then populate:
 
 - **`AGENTS.md`** — fill in *What this project is* and *Facts worth knowing before you touch
-  anything*; set the title; **remove the uninitialized-template banner.** Keep the operating-model sections (how-we-work, session workflow, standing
-  instructions, doc hierarchy) intact. Leave the `CLAUDE.md` shell alone — it just imports this
+  anything* (including the data-access answers, if any); set the title; **remove the
+  uninitialized-template banner.** Keep the operating-model sections (how-we-work, session
+  workflow, standing instructions, doc hierarchy) intact. Leave *Standing rules* at "None yet"
+  unless the interview produced hard, checkable limits — e.g. "aggregates only, never client rows"
+  or "never write to the production database" — in which case propose them as the first rules and
+  log them with the kickoff decisions. Leave the `CLAUDE.md` shell alone — it just imports this
   file.
 - **`README.md`** — **replace it.** The template ships with a README that describes the template
   itself, which would otherwise end up as the public face of the new project's repo. Overwrite it
@@ -94,22 +115,39 @@ Summarize what you heard in a few lines and confirm before writing. Then populat
 - **`docs/5-deferred-items.md`** — add any consciously-punted items surfaced in the interview (only if
   real); otherwise leave the scaffold.
 - **`docs/6-working-model.md`** — fill in the **Project defaults** block from the interview:
-  mode (`solo` or `coordinator/subagents`), version control (`git` or `svn`), parallel
-  dispatch (`serial` or `parallel-allowed`), and the **Model tiers** table (replace the `e.g.`
-  placeholders with the chosen aliases). Leave the rest of the doc as-is (it's the standing
+  mode (`solo` or `coordinator/subagents`), layout (`single` or `split`), version control (`git`
+  or `svn`), parallel dispatch (`serial` or `parallel-allowed`), the **Code repositories** table
+  (split only — delete it on single-repo projects), and the **Model tiers** table (replace the
+  `e.g.` placeholders with the chosen aliases). Leave the rest of the doc as-is (it's the standing
   model, not project-specific). If the project is solo, a one-line note that the
   coordinator/subagents option remains available is enough.
 - **`.claude/agents/executor.md`** (Claude Code only) — set the `model:` frontmatter line to the
   **standard executor** alias from the tier table. Change nothing else in that file.
 - **`.gitignore`** — the template ships with only the agent-local settings entry. Add the standard
   ignores for the project's stack (build output, dependency directories, IDE folders, local env
-  files). Keep the `.claude/settings.local.json` line.
+  files). Keep the `.claude/settings.local.json` line. On a **split** project, the harness holds
+  no code: add `/repos/` instead of the stack ignores (those belong in each code repo).
+- **Split layout only:**
+  - **`AGENTS.md` → *Repository layout*** — fill in the one-line-per-repo summary and keep the
+    split-layout rules. (On a single-repo project, replace the placeholder with "This repo holds
+    both the code and the project docs." and delete the split-layout rules block.)
+  - **Clone the code repos** into `repos/<name>/` — run the clones with the developer's
+    permission, or give them the commands to run. A brand-new code repo is the developer's to
+    create on its host first.
+  - **Draft `AI-HARNESS.md` at each code repo's root** — a short pointer back to this harness:
+    the harness repo's URL, today's date and the harness commit at setup (if there is one yet), one
+    line on what the harness holds (planning docs, decision log, work orders), a note that
+    contributors don't need it to work on the code, and where the code's own architecture and
+    setup docs live. Leave it **uncommitted** in the code repo — the developer commits it there.
+  - **`README.md`** (the new project README) — include getting-started steps for a fresh machine:
+    clone the harness, then clone each code repo into `repos/<name>/`, then launch the agent from
+    the harness root.
 - **`docs/1-documentation-index.md`** — flip operating-set rows (including `6-working-model.md`)
   from 🌱 Scaffold to ✅ Verified as they fill in, stamp dates, and add rows for any
   project/reference docs the developer pointed at.
 - **`.claude/settings.json`** (Claude Code only — skip in other agents) — if the developer named
   off-limits/read-only areas, propose adding `deny` rules for those paths (confirm the absolute paths
-  first). Add any safe project-specific `allow` entries they want.
+  first; on a split project they'll usually sit under `repos/<name>/`). Add any safe project-specific `allow` entries they want.
 
 ## 3. Report
 

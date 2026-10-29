@@ -25,7 +25,9 @@ per Bash call**:
 - Drop cosmetic `echo` headers/separators; put that context in the call's `description`.
 - Use the **Grep / Glob / Read** tools instead of `grep` / `find` / `cat` / `head` / `tail`.
 - Limit output with flags (`git log -n 10`, `git diff --stat`), not by piping to `head`.
-- Avoid `cd X && …`; use absolute paths (the working dir already persists between calls).
+- Avoid `cd X && …`; use absolute paths (the working dir already persists between calls). For git
+  in another repo — a split-layout project's code repos — use `git -C repos/<name> …`; the
+  read-only forms are allowlisted, and the deny rules cover the `-C` forms of push/rebase/reset.
 
 Safe, reusable permissions live in tracked `.claude/settings.json`; keep machine-local or secret
 overrides in `.claude/settings.local.json` (gitignored). Once your common commands settle, run
